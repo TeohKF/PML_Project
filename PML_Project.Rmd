@@ -1,16 +1,13 @@
----
-title: "Practical Machine Learning Course Project"
-output: html_document
----
 
-#### Reproduceability
+
+### Reproduceability
 
 Seed was set as 2014 for this work, which is thus reproduceable.
 
-#### Analysis, codes and results
+### Analysis, codes and results
 
+##### Install & load packages, seed
 ```{r}
-# Install & load packages, seed
 library(caret)
 library(randomForest) 
 library(rpart) 
