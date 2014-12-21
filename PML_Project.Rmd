@@ -1,0 +1,79 @@
+---
+title: "Practical Machine Learning Course Project"
+output: html_document
+---
+
+#### Reproduceability
+
+Seed was set as 2014 for this work, which is thus reproduceable.
+
+#### Analysis, codes and results
+
+```{r}
+# Install & load packages, seed
+library(caret)
+library(randomForest) 
+library(rpart) 
+library(rpart.plot) 
+set.seed(2014)
+```
+
+##### Data processing
+
+```{r}
+training <- read.csv("C:/Users/Kaifeng/Desktop/Practical_Machine_Learning_Project1/pml-training.csv", na.strings=c("NA","#DIV/0!", ""))
+testing <- read.csv("C:/Users/Kaifeng/Desktop/Practical_Machine_Learning_Project1/pml-testing.csv", na.strings=c("NA","#DIV/0!", ""))
+
+training<-training[,colSums(is.na(training)) == 0]
+testing <-testing[,colSums(is.na(testing)) == 0]
+training <-training[,-c(1:7)];testing <-testing[,-c(1:7)]
+```
+
+##### Data partition for cross validation
+
+```{r}
+subsamples <- createDataPartition(y=training$classe, p=0.7, list=FALSE)
+CVtraining <- training[subsamples, ] 
+CVtesting <- training[-subsamples, ]
+# summary of the CV datasets
+summary(CVtraining$classe);summary(CVtesting$classe)
+```
+
+##### Method 1: Decision Tree (DT)
+
+```{r}
+model1 <- rpart(classe ~ ., data=CVtraining, method="class")
+prediction1 <- predict(model1, CVtesting, type = "class")
+# accurary assessment
+confusionMatrix(prediction1, CVtesting$classe)
+```
+
+
+##### Method 2: Random Forest (RF)
+
+```{r}
+model2 <- randomForest(classe ~. , data=CVtraining, method="class")
+prediction2 <- predict(model2, CVtesting, type = "class")
+# accurary assessment
+confusionMatrix(prediction2, CVtesting$classe)
+```
+
+##### Comparision & conclusion
+
+As we can see, accurary rate of RF=0.9956>0.7415=accurary rate of DT. Thus RF is chosen for predictive popurse, with expected out of sample error, 1-0.9956=0.0044.
+
+##### Prediction
+
+```{r}
+predictfinal <- predict(model2, testing, type="class")
+```
+
+##### Function to generate files with predictions to submit for assignment
+
+```{r}
+pml_write_files = function(x){  n = length(x)  
+for(i in 1:n){    filename = paste0("problem_id_",i,".txt")    
+write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)  }}
+pml_write_files(predictfinal)
+```
+
